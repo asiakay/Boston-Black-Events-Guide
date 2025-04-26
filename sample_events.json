@@ -1,0 +1,62 @@
+[
+    {
+      "id": "sample-1",
+      "name": "Black Excellence Gala",
+      "description": "Annual celebration honoring community leaders and entrepreneurs making an impact in Boston.",
+      "summary": "Annual celebration honoring community leaders and entrepreneurs.",
+      "display_date": "Sat, May 3 • 7:00 PM",
+      "venue_name": "Roxbury Cultural Center",
+      "venue_address": "1234 Washington St, Boston",
+      "url": "#",
+      "is_free": false,
+      "image_url": ""
+    },
+    {
+      "id": "sample-2",
+      "name": "Diaspora Music Festival",
+      "description": "Celebrating the sounds of the African diaspora featuring local artists and international performers.",
+      "summary": "Celebrating the sounds of the African diaspora.",
+      "display_date": "Sun, May 4 • 1:00 PM",
+      "venue_name": "Franklin Park",
+      "venue_address": "Franklin Park, Boston",
+      "url": "#",
+      "is_free": false,
+      "image_url": ""
+    },
+    {
+      "id": "sample-3",
+      "name": "Black Authors Book Club",
+      "description": "Monthly book discussion featuring works by contemporary Black authors.",
+      "summary": "Monthly book discussion featuring works by contemporary Black authors.",
+      "display_date": "Thu, May 8 • 6:30 PM",
+      "venue_name": "Frugal Bookstore",
+      "venue_address": "Roxbury, Boston",
+      "url": "#",
+      "is_free": true,
+      "image_url": ""
+    },
+    {
+      "id": "sample-4",
+      "name": "Black Owned Business Market",
+      "description": "Support local Black entrepreneurs at this outdoor marketplace featuring 30+ vendors.",
+      "summary": "Support local Black entrepreneurs at this outdoor marketplace.",
+      "display_date": "Sat, May 10 • 10:00 AM",
+      "venue_name": "Nubian Square",
+      "venue_address": "Nubian Square, Roxbury",
+      "url": "#",
+      "is_free": true,
+      "image_url": ""
+    },
+    {
+      "id": "sample-5",
+      "name": "Soul Food Festival",
+      "description": "A celebration of Black cuisine and culinary traditions with Boston's top chefs.",
+      "summary": "A celebration of Black cuisine and culinary traditions.",
+      "display_date": "Sun, May 18 • 12:00 PM",
+      "venue_name": "Franklin Park",
+      "venue_address": "Franklin Park, Boston",
+      "url": "#",
+      "is_free": false,
+      "image_url": ""
+    }
+  ]
