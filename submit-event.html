@@ -15,51 +15,56 @@
     </header>
     
     <div class="container">
-        <form id="eventForm" class="event-form">
+        <div class="notice-card">
+            <h2>How it works</h2>
+            <p>Complete the form below and your event submission will be saved locally in your browser. An organizer can then review and import it from the admin dashboard.</p>
+        </div>
+
+        <form id="eventForm" class="event-form" novalidate>
             <div class="form-group">
                 <label for="name">Event Name*</label>
-                <input type="text" id="name" required>
+                <input type="text" id="name" name="name" required>
             </div>
             
             <div class="form-group">
                 <label for="description">Description*</label>
-                <textarea id="description" required></textarea>
+                <textarea id="description" name="description" required></textarea>
             </div>
             
             <div class="form-group">
                 <label for="summary">Short Summary*</label>
-                <input type="text" id="summary" required>
+                <input type="text" id="summary" name="summary" required>
                 <small>This will appear on the event card (keep it brief).</small>
             </div>
             
             <div class="form-group">
                 <label for="display_date">Date & Time*</label>
-                <input type="text" id="display_date" placeholder="Sat, May 3 • 7:00 PM" required>
+                <input type="text" id="display_date" name="display_date" placeholder="Sat, May 3 • 7:00 PM" required>
             </div>
             
             <div class="form-group">
                 <label for="venue_name">Venue Name*</label>
-                <input type="text" id="venue_name" required>
+                <input type="text" id="venue_name" name="venue_name" required>
             </div>
             
             <div class="form-group">
                 <label for="venue_address">Venue Address*</label>
-                <input type="text" id="venue_address" required>
+                <input type="text" id="venue_address" name="venue_address" required>
             </div>
             
             <div class="form-group">
                 <label for="url">Event URL*</label>
-                <input type="url" id="url" required>
+                <input type="url" id="url" name="url" required>
             </div>
             
             <div class="form-group checkbox">
-                <input type="checkbox" id="is_free">
+                <input type="checkbox" id="is_free" name="is_free">
                 <label for="is_free">This event is free</label>
             </div>
             
             <div class="form-group">
                 <label for="category">Category*</label>
-                <select id="category" required>
+                <select id="category" name="category" required>
                     <option value="">Select...</option>
                     <option value="Music">Music</option>
                     <option value="Arts & Culture">Arts & Culture</option>
@@ -70,37 +75,87 @@
                 </select>
             </div>
             
-            <button type="submit" class="submit-btn">Submit Event</button>
+            <div class="form-actions">
+                <button type="submit" class="submit-btn">Submit Event</button>
+                <a class="secondary-link" href="admin.html">Go to Admin Dashboard</a>
+            </div>
         </form>
+        <div id="submissionMessage" class="status-message" role="status" aria-live="polite" hidden></div>
     </div>
-    
+
     <footer>
         <div class="container">
-            <p>© 2025 Boston Black Events Guide | <a href="index.html">Home</a> | <a href="#">About</a> | <a href="#">Contact</a></p>
+            <p>© 2025 Boston Black Events Guide | <a href="index.html">Home</a> | <a href="#">About</a> | <a href="#">Contact</a> | <a href="admin.html">Admin Dashboard</a></p>
         </div>
     </footer>
-    
+
     <script>
-        document.getElementById("eventForm").addEventListener("submit", function(e) {
+        const form = document.getElementById("eventForm");
+        const submissionMessage = document.getElementById("submissionMessage");
+
+        function getPendingEvents() {
+            try {
+                const stored = localStorage.getItem("pendingEvents");
+                return stored ? JSON.parse(stored) : [];
+            } catch (error) {
+                console.error("Unable to read pending events", error);
+                return [];
+            }
+        }
+
+        function savePendingEvents(events) {
+            try {
+                localStorage.setItem("pendingEvents", JSON.stringify(events));
+                return true;
+            } catch (error) {
+                console.error("Unable to save pending events", error);
+                return false;
+            }
+        }
+
+        form.addEventListener("submit", function(e) {
             e.preventDefault();
-            
+
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                submissionMessage.textContent = "Please complete all required fields before submitting.";
+                submissionMessage.classList.remove("success");
+                submissionMessage.classList.add("error");
+                submissionMessage.hidden = false;
+                return;
+            }
+
+            const formData = new FormData(form);
             const newEvent = {
                 id: "event-" + Date.now(),
-                name: document.getElementById("name").value,
-                description: document.getElementById("description").value,
-                summary: document.getElementById("summary").value,
-                display_date: document.getElementById("display_date").value,
-                venue_name: document.getElementById("venue_name").value,
-                venue_address: document.getElementById("venue_address").value,
-                url: document.getElementById("url").value,
-                is_free: document.getElementById("is_free").checked,
-                category: document.getElementById("category").value
+                name: formData.get("name")?.trim() || "",
+                description: formData.get("description")?.trim() || "",
+                summary: formData.get("summary")?.trim() || "",
+                display_date: formData.get("display_date")?.trim() || "",
+                venue_name: formData.get("venue_name")?.trim() || "",
+                venue_address: formData.get("venue_address")?.trim() || "",
+                url: formData.get("url")?.trim() || "",
+                is_free: formData.get("is_free") === "on",
+                category: formData.get("category") || "",
+                submitted_at: new Date().toISOString()
             };
-            
-            // For now, log the JSON (you'll replace this with API/GitHub submission)
-            console.log("New Event:", JSON.stringify(newEvent, null, 2));
-            alert("Thank you! Your event has been submitted for review.");
-            this.reset();
+
+            const pendingEvents = getPendingEvents();
+            pendingEvents.push(newEvent);
+
+            if (savePendingEvents(pendingEvents)) {
+                submissionMessage.textContent = "Thank you! Your event has been saved. An admin can review it from the dashboard.";
+                submissionMessage.classList.remove("error");
+                submissionMessage.classList.add("success");
+                submissionMessage.hidden = false;
+                form.reset();
+                form.querySelector("#name").focus();
+            } else {
+                submissionMessage.textContent = "We couldn't save your submission. Please ensure your browser allows local storage and try again.";
+                submissionMessage.classList.remove("success");
+                submissionMessage.classList.add("error");
+                submissionMessage.hidden = false;
+            }
         });
     </script>
 </body>

@@ -226,6 +226,12 @@ button {
     margin-right: 0.5rem;
 }
 
+.form-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
 .event-form .submit-btn {
     background: #000;
     color: #fff;
@@ -241,6 +247,23 @@ button {
     background: #333;
 }
 
+.secondary-link {
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.secondary-link:hover,
+.secondary-link:focus {
+    text-decoration: underline;
+}
+
+.secondary-link.disabled {
+    color: #888;
+    pointer-events: none;
+    text-decoration: none;
+}
+
 small {
     display: block;
     margin-top: 0.25rem;
@@ -248,12 +271,128 @@ small {
     font-size: 0.875rem;
 }
 
+.notice-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.status-message {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+.status-message.success {
+    background-color: #d1f7c4;
+    color: #1b5e20;
+}
+
+.status-message.error {
+    background-color: #ffd7d7;
+    color: #8b0000;
+}
+
+.admin-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin: 2rem 0 1rem;
+}
+
+.pending-events {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.pending-event {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    padding: 1.5rem;
+    display: grid;
+    gap: 1rem;
+}
+
+.pending-event__summary dl {
+    display: grid;
+    gap: 0.35rem;
+    margin: 0;
+}
+
+.pending-event__summary dt {
+    font-weight: 600;
+    color: #555;
+}
+
+.pending-event__summary dd {
+    margin: 0;
+}
+
+.pending-event__details {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.pending-event__meta {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.pending-event__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.pending-event__actions .danger {
+    background: #c1121f;
+}
+
+.pending-event__actions .danger:hover {
+    background: #a00f1a;
+}
+
+.pending-event.flash::after,
+.pending-event.flash-error::after {
+    content: attr(data-flash);
+    display: inline-block;
+    margin-left: 0.75rem;
+    font-weight: 600;
+}
+
+.pending-event.flash::after {
+    color: #1b5e20;
+}
+
+.pending-event.flash-error::after {
+    color: #8b0000;
+}
+
 @media (max-width: 768px) {
     .events-container {
         grid-template-columns: 1fr;
     }
-    
+
     .form-group {
         flex-direction: column;
+    }
+
+    .admin-actions {
+        flex-direction: column;
+        align-items: flex-start;
     }
 }

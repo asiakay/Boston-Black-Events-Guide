@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Boston Black Events Guide</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Admin Dashboard</h1>
+            <p class="subtitle">Review and manage submitted events</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="notice-card">
+            <h2>Pending submissions</h2>
+            <p>These events were submitted from the public form and saved to this browser. Use the controls below to copy the
+                event data, mark items as reviewed, or export everything as JSON for publishing.</p>
+        </div>
+
+        <div class="admin-actions">
+            <button id="exportEvents" type="button">Export all to JSON</button>
+            <a class="secondary-link" href="submit-event.html">Back to submission form</a>
+        </div>
+
+        <section id="pendingContainer" class="pending-events" aria-live="polite">
+            <p class="empty-state">No pending submissions yet. Invite community members to share their events!</p>
+        </section>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>© 2025 Boston Black Events Guide | <a href="index.html">Home</a> | <a href="submit-event.html">Submit an Event</a></p>
+        </div>
+    </footer>
+
+    <template id="pendingEventTemplate">
+        <article class="pending-event">
+            <div class="pending-event__summary">
+                <h3 class="pending-event__title"></h3>
+                <dl>
+                    <div><dt>Date &amp; Time:</dt><dd data-field="display_date"></dd></div>
+                    <div><dt>Venue:</dt><dd data-field="venue"></dd></div>
+                    <div><dt>Category:</dt><dd data-field="category"></dd></div>
+                    <div><dt>Summary:</dt><dd data-field="summary"></dd></div>
+                </dl>
+            </div>
+            <div class="pending-event__details">
+                <p data-field="description"></p>
+                <p class="pending-event__meta">Submitted <span data-field="submitted_at"></span> · <span data-field="price"></span></p>
+                <div class="pending-event__actions">
+                    <button data-action="copy" type="button">Copy JSON</button>
+                    <a data-action="open" class="secondary-link" target="_blank" rel="noopener">View event link</a>
+                    <button data-action="reviewed" type="button" class="danger">Mark as reviewed</button>
+                </div>
+            </div>
+        </article>
+    </template>
+
+    <script>
+        const storageKey = "pendingEvents";
+        const pendingContainer = document.getElementById("pendingContainer");
+        const exportButton = document.getElementById("exportEvents");
+        const template = document.getElementById("pendingEventTemplate");
+
+        function readPendingEvents() {
+            try {
+                const stored = localStorage.getItem(storageKey);
+                return stored ? JSON.parse(stored) : [];
+            } catch (error) {
+                console.error("Unable to parse pending events", error);
+                return [];
+            }
+        }
+
+        function writePendingEvents(events) {
+            localStorage.setItem(storageKey, JSON.stringify(events));
+        }
+
+        function formatDate(isoString) {
+            try {
+                const date = new Date(isoString);
+                if (Number.isNaN(date.valueOf())) {
+                    return "Unknown";
+                }
+                return date.toLocaleString();
+            } catch (error) {
+                return "Unknown";
+            }
+        }
+
+        function renderEmptyState() {
+            pendingContainer.innerHTML = "";
+            const message = document.createElement("p");
+            message.className = "empty-state";
+            message.textContent = "No pending submissions yet. Invite community members to share their events!";
+            pendingContainer.appendChild(message);
+        }
+
+        function renderPendingEvents() {
+            const pendingEvents = readPendingEvents();
+
+            if (!pendingEvents.length) {
+                renderEmptyState();
+                return;
+            }
+
+            pendingContainer.innerHTML = "";
+            pendingEvents.forEach(event => {
+                const instance = template.content.cloneNode(true);
+                instance.querySelector(".pending-event__title").textContent = event.name || "Untitled Event";
+                instance.querySelector('[data-field="display_date"]').textContent = event.display_date || "TBD";
+                instance.querySelector('[data-field="venue"]').textContent = event.venue_name ? `${event.venue_name}${event.venue_address ? ` • ${event.venue_address}` : ""}` : (event.venue_address || "TBD");
+                instance.querySelector('[data-field="category"]').textContent = event.category || "Uncategorized";
+                instance.querySelector('[data-field="summary"]').textContent = event.summary || "No summary provided.";
+                instance.querySelector('[data-field="description"]').textContent = event.description || "No description provided.";
+                instance.querySelector('[data-field="submitted_at"]').textContent = formatDate(event.submitted_at);
+                instance.querySelector('[data-field="price"]').textContent = event.is_free ? "Free" : "Paid/Unknown";
+
+                const openLink = instance.querySelector('[data-action="open"]');
+                openLink.href = event.url || "#";
+                openLink.textContent = event.url ? "Open event link" : "No link provided";
+                if (!event.url) {
+                    openLink.classList.add("disabled");
+                    openLink.setAttribute("aria-disabled", "true");
+                }
+
+                const article = instance.querySelector(".pending-event");
+
+                instance.querySelector('[data-action="copy"]').addEventListener("click", () => {
+                    if (!navigator.clipboard || !navigator.clipboard.writeText) {
+                        article.dataset.flash = "Clipboard unavailable";
+                        article.classList.add("flash-error");
+                        setTimeout(() => article.classList.remove("flash-error"), 700);
+                        return;
+                    }
+
+                    navigator.clipboard.writeText(JSON.stringify(event, null, 2))
+                        .then(() => {
+                            article.dataset.flash = "Copied!";
+                            article.classList.add("flash");
+                            setTimeout(() => article.classList.remove("flash"), 700);
+                        })
+                        .catch(err => {
+                            console.error("Copy failed", err);
+                            article.dataset.flash = "Copy failed";
+                            article.classList.add("flash-error");
+                            setTimeout(() => article.classList.remove("flash-error"), 700);
+                        });
+                });
+
+                instance.querySelector('[data-action="reviewed"]').addEventListener("click", () => {
+                    const updated = readPendingEvents().filter(item => item.id !== event.id);
+                    writePendingEvents(updated);
+                    renderPendingEvents();
+                });
+
+                pendingContainer.appendChild(instance);
+            });
+        }
+
+        exportButton.addEventListener("click", () => {
+            const pendingEvents = readPendingEvents();
+            const blob = new Blob([JSON.stringify(pendingEvents, null, 2)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = "pending-events.json";
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+        });
+
+        renderPendingEvents();
+    </script>
+</body>
+</html>
